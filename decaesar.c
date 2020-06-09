@@ -1,7 +1,6 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
-#include <ctype.h>
+#include <string.h>
 #include "common.h"
 
 void usage();
@@ -20,7 +19,7 @@ int main(int argc, char* argv[])
   }
 
   /* the first argument/paramater becomes the int shift */
-  int shift = atoi(argv[1]);
+  int shift = -atoi(argv[1]);
   /* max line size of 4095 chars */
   char* line = malloc(sizeof(char) * BUFF_SIZE);
   char* crypt_line = malloc(sizeof(char) * BUFF_SIZE);
@@ -43,7 +42,5 @@ int main(int argc, char* argv[])
 
 void usage()
 {
-  /* angle brackets indicate a required paramater */
-  printf("Usage: caesar <key>\n");
-  /* P.S. for reference purposes square brackets indicate an optional one */
+  printf("Usage: decesar <key>\n");
 }
