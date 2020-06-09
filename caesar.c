@@ -2,55 +2,103 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <stdbool.h>
 
-#define FIRST_CHAR 65
-#define LAST_CHAR 90
-#define MODULO_POINT 91
+/* maximum size of input string */
+size_t BUFF_SIZE = 4096;
 
-static char* allowed = "ABCDEFGHIJKLMNOPQRSTUBWXYZ";
+char shift_by(char, int);
+void shift_str_by(char*, int, char*);
+bool all_digits(char*);
+void usage();
 
-char shift_by(int by, char c)
+int main(int argc, char* argv[])
 {
-  /* if C is in the 'allowed' list */
-  if (strchr(allowed, c))
+  /* if the first paramater is not provided;
+   * or the value supplied as the first paramater is less than one;
+   * or the first paramater contains anything other than numbers, like a period */
+  if (argc != 2 || atoi(argv[1]) < 1 || !all_digits(argv[1]))
   {
-    /* if c + shift is more than 'Z' */
-    if (c + by > LAST_CHAR)
-      /* return 'A' + remainder of shift minus 'Z' + 1;
-       * in essense, start at A and add what was left from the shift after reaching Z */
-      return FIRST_CHAR + ((c + by) % MODULO_POINT);
-    /* otherwise; if c + shift is not more than 'Z' */ 
-    else
-      /* return char + offset */
-      return c + by;
+    /* print program usage info */
+    usage();
+    /* tell computer this program terminated unsucessfully */
+    return -1;
   }
-  /* if not an allowed character */
-  else
+
+  /* the first argument/paramater becomes the int shift */
+  int shift = atoi(argv[1]);
+  /* max line size of 4095 chars */
+  char* line = malloc(sizeof(char) * BUFF_SIZE);
+  char* crypt_line = malloc(sizeof(char) * BUFF_SIZE);
+  /* get line from standard input until end of file, or Ctrl+D */
+  while (getline(&line, &BUFF_SIZE, stdin) != EOF)
   {
-    return c;
+    /* put the result of *line* shifted by *shift* into *crypt_line* */
+    shift_str_by(line, shift, crypt_line);
+    /* print crypt_line string */  
+    printf("%s", crypt_line);
+    /* clear crypt_line string of previous results */
+    memset(crypt_line, 0, BUFF_SIZE);
   }
-}
 
-char* shift_str_by(int by, char* c, int len)
-{
-  char* done = malloc(sizeof(char) * len);
-  int i;
-  for (i = 0; i < len; ++i)
-  {
-    done[i] = shift_by(by, toupper(c[i]));
-  }
-  return done;
-}
-
-int main()
-{
-  static char message[250] = "Hello, Caesar!";
-
-  printf("A + 2 = %c\n", shift_by(2, 'A'));
-  printf("Z + 1 = %c\n", shift_by(1, 'Z'));
-  int len = strlen(message) + 1;
-  char* done = shift_str_by(3, message, len);
-  printf("'Hello, Caesar!' + 3 = %s\n", done);
-
+  /* free the memory used by the line and crypt_line strings */
+  free(line);
+  free(crypt_line);
   return 0;
+}
+
+void usage()
+{
+  /* angle brackets indicate a required paramater */
+  printf("Usage: caesar <key>\n");
+  /* P.S. for reference purposes square brackets indicate an optional one */
+}
+
+bool all_digits(char* string)
+{
+  int len = strlen(string);
+  for (int i = 0; i < len; ++i)
+  {
+    /* if any character in the string is not a digit */
+    if (!isdigit(string[i]))
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
+char shift_by(char old_char, int by)
+{
+  /* if signed (default) char, then it can overflow 
+   * 'z' (122) + 12 = -121 if signed
+   * 'z' (122) + 12 = 134 if unsigned */
+  unsigned char shifted_char;
+  /* return the character as is if the character is not an alphabetic character */
+  if (!isalpha(old_char))
+    return old_char;
+
+  shifted_char = old_char + by;
+  /* if the old_char is a lower case letter and the shifted character has gone past the value of a lowercase 'z' */
+  if (islower(old_char) && shifted_char > 'z')
+  {
+    /* wrap around back to 'a' */
+    shifted_char = 'a' + (shifted_char % 'z' - 1);
+  }
+  /* same as above with uppercase */
+  if (isupper(old_char) && shifted_char > 'Z')
+  {
+    /* same as above with uppercase */
+    shifted_char = 'A' + (shifted_char % 'Z' - 1);
+  }
+  return shifted_char;
+}
+
+void shift_str_by(char* c, int by, char* shifted)
+{
+  int len = strlen(c);
+  for (int i = 0; i < len; ++i)
+  {
+    shifted[i] = shift_by(c[i], by);
+  }
 }
