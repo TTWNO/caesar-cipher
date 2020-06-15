@@ -25,6 +25,18 @@ char shift_by(char old_char, int by)
     /* same as above with uppercase */
     shifted_char = 'A' + (shifted_char % 'Z' - 1);
   }
+
+  /* check for negative letters */
+  if (islower(old_char) && shifted_char < 'a')
+  {
+    /* wrap around to the end of the lower alphabet */
+    shifted_char = 'z' - ('a' - shifted_char - 1);
+  }
+  if (isupper(old_char) && shifted_char < 'A')
+  {
+    shifted_char = 'Z' - ('A' - shifted_char - 1);
+  }
+
   return shifted_char;
 }
 
