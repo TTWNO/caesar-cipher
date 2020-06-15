@@ -1,7 +1,7 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include "common.h"
 
 void usage();
@@ -20,7 +20,13 @@ int main(int argc, char* argv[])
   }
 
   /* the first argument/paramater becomes the int shift */
-  int shift = atoi(argv[1]);
+  // if given a DECEASAR compile paramater, use a negative
+  int shift;
+#ifdef DECAESAR
+  shift = -atoi(argv[1]);
+#else
+  shift = atoi(argv[1]);
+#endif
   /* max line size of 4095 chars */
   char* line = malloc(sizeof(char) * BUFF_SIZE);
   char* crypt_line = malloc(sizeof(char) * BUFF_SIZE);
